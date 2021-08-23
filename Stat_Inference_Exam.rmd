@@ -1,0 +1,432 @@
+---
+title: 'Exam Template: Statistical Inference'
+author: "20042768"
+date: '2021 May 10th'
+RVersion: insert version of R here (e.g. 4.0.3)
+RStudio Version: insert version of RStudio here (e.g. 1.0.143)
+Operating System: Mac
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions for candidates
+
+You should use the file Exam_template.Rmd provided on blackboard and you should load this file from your data folder / directory.
+
+Save this template as your studentID.Rmd; you will upload this file as your submission.
+
+Ensure that you save your data into your data folder (as discussed in class). You may use the files mypackages.R and helperFunctions.R; if you use these, do not alter them. If you wish to create additional files for custom functions that you have prepared in advance, make sure that you upload these in addition to your .Rmd file.
+
+Any changes that you make to the data (e.g. variable name changes) should be made entirely within R.
+
+The author of this document should be set to **your student ID**. Do not change the authorship to your name.
+
+The subsubsections labelled **Answer** indicate where you should put in your written answers. The template also provides blank code chunks for you to complete your answers; you may choose to add additional chunks if required.
+
+```{r libraries, include=FALSE}
+# load required libraries / additional files
+source("mypackages(2).R")
+source("helperFunctions.R")
+```
+
+```{r data}
+# load dataset
+Initial_Bikes<-read.csv("SeoulBikeData_forMacUsers(1).csv", stringsAsFactors = FALSE)
+Initial_Bikes <- as.data.frame(Initial_Bikes)
+```
+
+# Data description
+
+This dataset is a part of a dataset describing the number of bikes hired every hour as part of a bike sharing scheme in Seoul, South Korea.
+You have been asked to create a statistical model to help explain the variation in the number of bikes hired each hour.
+For simplicity, look at summer days that are not holidays and only use daylight hours defined by having solar radiation (MJ/m2) values greater than 0 when the scheme was functioning.
+
+Once you have completed the instructions above for selecting which subgroup of the data to analyse, use your studentID as a seed and select (but retain the order) 1000 observations to use for the analysis.
+
+Include the version of R that you are using and the operating system that you are using at the start of this file (with your studentID information).
+
+
+
+# Question 1: Data Preparation (11 marks)
+
+a. Explain what data preparation is required for this analysis.
+
+**(4 marks)**
+
+### Answer: 
+The data preparation required for this analysis begins with selecting a subset of our initial data. To simplify we only want summer days that are not holidays. We also want a radiation greater than zero, and the days to be functioning without a holiday.
+Therefore, multiple filters are created and applied to the Bikes data frame. The filters are then verified, by seeing the unique values present. 432 observations are dropped. 
+After we have our correct subset, we draw random values of the set using student IDs as the seed. 
+
+b. Implement the required preparation in the code chunk below:
+
+**(7 marks)**
+
+### Answer:
+
+```{r dataprep}
+correct_solar <- filter(Initial_Bikes, Solar.Radiation..MJ.m2.>0)
+functioning_day <- filter(correct_solar, Functioning.Day == "Yes")
+correct_season <- filter(functioning_day, Seasons == "Summer")
+Filtered_Bikes <- filter(correct_season, Holiday == "No Holiday")
+
+set.seed(20042768)
+index<- sample(1:nrow(Filtered_Bikes),1000)
+ind<-sort(index)
+data <-Filtered_Bikes[ind,]
+```
+
+# Question 2: Exploratory Data Analysis (23 marks)
+
+## Descriptive Statistics
+
+a. What descriptive statistics would be appropriate for this dataset?
+**(2 marks)**
+
+### Answer (List them first):
+(you may want to group variables)
+      Categorical               Continuous
+     "Seasons"                  "Rented.Bike.Count"      
+     "Functioning.Day"          "Temperature"            
+     "Holiday"                  "Wind.speed..m.s."       
+     "Hour"                     "Dew.point.temperature"  
+                                "Rainfall.mm."           
+                                "Humidity"  
+                                "Date"
+                                "Snowfall..cm"
+                                "Solar.Radiation..MJ.m2."
+                                "Visibility..10m."
+                                
+Some descriptive statistics that are appropriate for this data set are standard deviation, range, skew, mean, and median.   Standard deviation, and range give us measure to gauge how spread out our data is. While skew, mean, and median lets us know in what way the data is leaning, or how it is distributed. 
+                  
+b. Perform those descriptive statistics in the code chunk below:
+
+**(4 marks)**
+
+### Answer:
+
+```{r DescriptiveStats}
+#Explain the variation in the number of bikes hired each hour. 
+count(data, Hour, Rented.Bike.Count)
+describe(data)
+
+```
+
+c. What have those descriptive statistics told you? 
+
+**(4 marks)**
+
+### Answer:
+Since we simplified our model down with the filters, our categorical variables are limited. Seasons, Holiday, and functioning day are all set to a specific value. 
+
+Our interest lies in making sense of the variation in the number of bikes hired each hour. So to start off, one thing that demonstrates frequency between a continuous (Rented.Bike.Count) & categorical (Hour) variable is the count. 
+A takeaway from this comparison shows more bikes are typically rented before working & after working hours. 
+
+Rented Bike Count Describe By:
+The describe by function gives us all descriptive statistics by variable. From our findings, some of the things that stand out initially are the range of the rented bike count. This comes into question a second time, as our mean value is 1188, and the median is 1027. The scope of these numbers are not something to worry about. It suggests that most our data lands in lower numbers, but there were a few bigger bike rental days which skewed the data upwards. Skew - 0.77
+
+
+## Exploratory Graphs
+
+d. What exploratory graphs would be appropriate for this dataset?
+
+**(2 marks)**
+
+### Answer (List them first):
+
+Graphs : Scatterplot, Barplot, Density, Boxplot 
+
+Boxplot - Boxplots are appropriate for any of the continuous weather measurements. It provides an immediate finding of mean, quartiles & range. 
+
+Scatterplot - The scatterplot is a great opportunity to plot with two continuous variables. 
+In this case the categorical is hour, and the numerical is rented bikes. This is taken a step further with the facet wrap 
+based on hours to visually display the difference. 
+
+Barplot - The barplot is great for categorical variables, as it gives us the visual frequency of what hours were randomly selected by the seed. I took the plot a step further by breaking it down by percentage, and showing what hours are misrepresented. 
+
+Density - A basic density plot, gives the viewer an easy visualization of the rented bike counts' distribution. 
+
+e. Now run those exploratory graphs in the code chunk below:
+
+**(4 marks)**
+
+### Answer:
+
+```{r ExploratoryGraphs}
+
+boxplot(data$Humidity~data$Hour, ylab = 'Humidity Measurement', main = 'Summer Humidity by Hour')
+
+#Scatterplot of Rented.Bike.Count comparative to the temperature outside. Facet wrapped by hour
+ggplot(data = data)+
+  geom_point(mapping=aes(x = Rented.Bike.Count, y = Temperature))+facet_wrap(~Hour)+
+  xlab("Rented Bikes")+theme_bw()
+
+#Scatterplot of Rented.Bike.Count comparative to the temperature outside with geom smooth line. 
+ggplot(data = data, mapping = aes(x = Rented.Bike.Count, y = Temperature))+
+  geom_point()+geom_smooth()
+
+ggplot(data)+geom_bar(aes(x = Hour, y = after_stat(100*count/sum(count))))
+
+ggplot(data)+geom_density(aes(x=Rented.Bike.Count))+
+  xlab("Distribution of Bike Rentals")
+
+#ggplot(data = data)+
+  
+```
+
+f. What have those exploratory graphs told you?
+
+### Answer:
+These exploratory graphs have visually told me many things through simple visualizations. Through the relationship of a scatterplot we can see that majority of bike rentals occur when the temperature is around 25-30. Meanwhile on the inverse part of that relationship we can see that the Bike Rentals are grouped around 0 when the temperature is around 20. 
+The facet wrap portion allows us to see the exact same relationship of temperature to bike rentals, but it is separated by hour. Our findings tell us that before noon we are much less likely to get more than 1500 bike rentals with the acceptance of 8 in the morning. The opposing side of this relationship shows that our bigger rentals of 2000 & above begins occurring after the time of 15 in the afternoon. 
+
+The bar graph visually displays the effectiveness of our random seed, and how certain hours are underrepresented. For example, the 6th hours account for under 4% of the data, while all other hours are 6% & above. 
+
+A simple density plot is a great visualization for our summary statistics. By looking at this graph, one can visually see the range of the Bike rentals, as well as the peaks & troughs. 
+
+Lastly, the boxplot grouped by a categorical variable is extremely telling. My boxplot represented easily shows the moving averages of humidity throughout the day. You can also see the range, quartiles, at outliers at just a glance. 
+
+
+## Correlations
+
+g. What linear correlations are present within this data?
+
+**(2 marks)**
+
+### Answer:
+Firstly we must drop all of categorical variables in the dataset, as they provide no correlation to numerical variables.
+Once that is done, we can visually see correlations. Humidity relative to temperature & solar move in opposite directions as they have negative correlations. Dew point temperature to humidity has the absolute third highest correlation with a positive relationship. Lastly hour to rented bike count also have a positive relationship as we saw earlier in the facet wrap display.  
+
+Solar.Radiation..MJ.m2. relative to Humidity : -.65
+Temperature relative to Humidity : -.56
+Dew Point Temperature to Humidity : .52
+Hour to Rented.Bike.Count : .50
+
+
+
+```{r linearcor}
+
+df <- data[ -c(1,11:14)]
+corrplot::corrplot(cor(df))
+
+#the correlation of rented bike count relative to all other variables. 
+#the correlation of humidity relative to all other variables. 
+(cor(df)[,1])
+(cor(df)[,4])
+
+```
+
+# Question 3: Bivariate relationship (14 marks)
+
+a. Which of the potential explanatory variables has the strongest linear relationship with the dependent variable?
+
+**(1 mark)**
+
+### Answer: 
+
+In this case the dependent variable is the Rented Bike Count. As we saw in the visualization above the best fitting explanatory variable is the hour. They boast a positive relationship of .50
+
+The strongest linear relationship in general is Solar Radiation comparative to Humidity, however this does us no good in examining the bike sharing scheme. 
+
+b. Create a linear model to model this relationship.
+
+**(2 marks)**
+
+### Answer:
+```{r model1}
+m1 <- lm(Rented.Bike.Count ~ Hour, data = df)
+library(performance)
+install.packages('see')
+check_model(m1)
+m2 <- lm(Solar.Radiation..MJ.m2. ~ Humidity, data = df)
+check_model(m2)
+
+m3 <- lm(Temperature ~ Humidity, data = df)
+
+library(kableExtra)
+kbl(compare_performance(m1,m2,m3))%>% kable_classic(html_font = "Cambria", full_width = FALSE)
+
+ggplot(df)+geom_point(aes(x = Hour, y = Rented.Bike.Count))+geom_abline(slope = 125, intercept = 5)
+
+```
+
+c. Explain and interpret the model:
+
+**(3 marks)**
+
+### Answer:
+As we have seen through the graphing model, hour is a categorical variable therefore it is not appropriate to compare linearity. We can see through our normality instance that the residuals have a tough time following the linear model. This tells me that the data does not follow a typical distribution, as it has sharper peaks, & sharper troughs. In order for us to find a true linear model it must be based between two true continuous variables. 
+
+d. Comment on the performance of this model.
+
+**(4 marks)**
+
+### Answer:
+The performance of the m1 technically follows a linear pattern, with the exception of the 8th hour.
+Looking at the tables the R-squared for the same model(m1) comes out to 25%, meaning that the relationship that follows the linear line has 25% less variation than the mean. 
+
+The greatest R-squared value is with the m2 model, which compares the impact of humidity on solar radiation, our explanatory variable. The value comes in at 42%, which means that there is 42% less variation around the linear line than the average mean line. 
+
+
+## Bootstrap
+
+e. Use bootstrapping on this model to obtain a 95% confidence interval of the estimate of the slope parameter.
+
+**(4 marks)**
+
+### Answer:
+I could not get the bootstrapping formula to work. However, the basis for a bootstrap is done to resample data from a population with replacement on a massive scale. Effectively we create our new data through this approach, and we compare the baseline means & medians from our original data set to get a 95% confidence interval. 
+
+```{r bootstrap}
+
+#Nrepeats<-1000 # start small, then alter once your code is tested
+#bootstrap_means<-rep(NA,Nrepeats) # create an empty vector to store your means in
+#set.seed(547) # set a seed so that your results are replicable.
+#for(i in seq_len(Nrepeats)){ # a loop from 1 to Nrepeats
+ # x_temp<-sample(mydata$x,n,replace=TRUE) # sample n values with replacement
+  #bootstrap_means[i]<-mean(x_temp) # find the mean of this "temporary" dataset and store it
+#}
+#B.means<-data.frame(b_means=bootstrap_means)
+#ggplot(B.means, aes(x=b_means)) + 
+ # geom_histogram(aes(y = ..density..),binwidth = .1)+
+ # ggtitle("Bootstrapped Means")+
+ # theme_bw()
+
+```
+
+
+
+# Question 4: Multivariable relationship (10 marks)
+
+Consider a model with all of the explanatory variables included:
+
+```{r model3}
+
+t1<-psych::describeBy(data$Rented.Bike.Count,group=data$Hour,quant=c(.25,.75))
+TB1<-matrix(NA,nrow=max(seq_along(t1)),ncol=ncol(t1[[1]]))
+rownames(TB1)<-levels(data$Hour)
+colnames(TB1)<-colnames(t1[[1]])
+for(i in seq_along(t1)){
+TB1[i,]<-unlist(t1[[i]])
+}
+TB1<-TB1[,-1]
+
+TB1%>% kbl(format = "html", digits = 2) %>% kable_classic(html_font="Cambria",full_width=FALSE)
+
+peak_morning_time <- filter(df, Hour== 8)
+peak_afternoon_time <- filter(df, Hour ==18)
+ggplot(data = peak_afternoon_time, mapping = aes(x = Temperature, y = Rented.Bike.Count))+
+  geom_point()+geom_smooth()+xlab("Temperature During 18:00 Hours")
+ggplot(data = peak_morning_time, mapping = aes(x = Temperature, y = Rented.Bike.Count))+
+  geom_point()+geom_smooth()+xlab("Temperature During 8:00 Hours")
+
+
+BIC(lm(data$Rented.Bike.Count~1))
+BIC(lm(data$Rented.Bike.Count~data$Humidity))
+BIC(lm(data$Rented.Bike.Count~data$Wind.speed..m.s.))
+BIC(lm(data$Rented.Bike.Count~data$Hour))
+
+
+multi_relation<-lm(formula = data$Rented.Bike.Count ~ data$Wind.speed..m.s.+data$Visibility..10m.)
+summary(multi_relation)
+
+multi_relation2 <- lm(formula = data$Rented.Bike.Count~ data$Humidity + data$Dew.point.temperature)
+summary(multi_relation2)
+
+```
+
+a. Explain and interpret the model:
+
+**(4 marks)**
+
+### Answer:
+The multi-variable relationship displays the effects of outside factors as a group and their ability to impact overall bike rentals. 
+
+The peak hours are displayed by the quantiles that are within the last 4 hours of the day. Now with these hours also comes a greater standard deviation, yet the the outliers cause the mean to sway right on an upward scale. With the hours being the number one correlating relationship in regards to bike rentals, the statistical output says a lot. This inspired me to create a further filter regarding the two peak bike rental times during the hours of 8:00 & 18:00. 
+The two illustrations show that their is no rhyme or reason to the success during 8:00, it is extremely hit or miss which is why our standard deviation comes in at 710.33
+The illustration for 18:00 demonstrates greater consistency, as more of our residuals fall within the standard deviation.
+
+In addition, there are two muti relational models that represent the underlying correlation with Rented Bike Count. 
+multi_relation accounts for the two greatest postive correlations with bike rentals other than hour.
+multi_relaiton2 accounts for the two greatest negative correlations with bike rentals.
+
+Lastly the BIC linear model approach reinforces the effect of hour on bike rentals. 
+
+b. Comment on the performance of this model.
+
+**(4 marks)**
+
+### Answer:
+In regards to the multi_relation variable that account for the two greatest positive correlations. Because the multiple square value equals .0886, approximately 8.9% of variation in bike rentals can be explained by our model of wind speed & visibility. 
+
+In regards to the multi_relation2 variable that accounts for the two greatest negative correlations. 
+Because the multiple square value equals .1016, approximately 10.2% of variation in bike rentals can be explained by our model of humidity & dew point temperature.  
+
+
+c. What general concerns do you have regarding this model?
+
+**(2 marks)**
+
+### Answer: 
+My general concern about this model is that there are no absolute telling reasons of linearity in this data set other than hours. Perhaps because the categorical value of season was limited to Summer the hours became the main means of reasoning. It essentially limited the variance of our Bike Rentals. One other concern is that the coefficients regarding weather measurements are tough predictors for Bike rentals, as weather can be unpredictable. 
+
+
+# Question 5: Model simplification (12 marks)
+
+Try to simplify the model made for Question 4. 
+
+a. What grounds for model simplification are you considering and why?
+
+**(4 marks)**
+
+### Answer:
+The grounds for model simplification, relies on narrowing down the number of variables for the end user to comprehend. The output below keeps it simple with one linear model.
+
+```{r model4}
+kbl(compare_performance(m1))%>% kable_classic(html_font = "Cambria", full_width = FALSE)
+
+```
+
+b. Explain and interpret the selected "best" model. What model simplification (if any) has been achieved?
+
+**(4 marks)**
+
+### Answer:
+Despite a single variable linear model being simple for the end user to understand, the multivariable relationship packs the most information. We can see variation of bike rentals explained by a combination of other variables. 
+The TB1 containing general statistics broken down by hour is absolute gold. This gave me insight to group the hours by peak morning and afternoon times. 
+If this model could be simplified it would simply be choosing a group of impactful variables and sticking to them. 
+
+c. Comment on the performance of this model.
+
+**(4 marks)**
+
+### Answer:
+The performance of the model was telling in the fact that the multiple R squared values showed small relationships of 8% & 10%. These influencing variables boasted the top correlation, yet only had a small impact on the bike rentals.  
+
+
+# Question 6: Reporting (30 marks)
+
+Write a short report for a client based in Bristol outlining your analysis and your findings, illustrating what they could learn about patterns in when bicycles are hired and any data collection recommendations you have for them so that they can optimise the analysis for their situation.
+
+Highlight what may or may not be directly transferable from the scenario analysed here. 
+
+### Answer:
+Analysis & Findings:
+To outline the analysis, one of the main findings demonstrate that bikes hired each hour seem to be planned instances, as the main hours of usage are 8:00 & 18:00. Based off of inference, these are peak free times to the average working human. There is also no denying the factual data that the greater number of bikes rented is more likely to happen in the afternoon. There is a sweet spot for temperature as well as the 30-35 range maintains consistency for greater afternoon numbers. For the management team running the bike sharing scheme they can turn data analysis into decisions & understand that there is more likelihood for rentals during certain times. This can translate into more hands on deck during peak hours. 
+
+```{r}
+#Scatterplot of Rented.Bike.Count comparative to the temperature outside. Facet wrapped by hour
+ggplot(data = data)+
+  geom_point(mapping=aes(x = Rented.Bike.Count, y = Temperature))+facet_wrap(~Hour)+
+  xlab("Rented Bikes")+theme_bw()
+```
+
+Data Collection Recommendations:
+In order to optimize analysis as a business, it is essential to define your questions. For example, a question could be what does our customer look like in terms of economical status. 
+Well that now requires means for gathering data on customers. From that point a business can begin to understand who there customer is, and target them accordingly. The statistical inference can make sense of a business and how to move forward. 
+
+Another thing that should be mentioned is variable storage. The naming scheme of the variables is not effective. For example, Wind.speed..m.s. could be renamed to Wind_speed_ms. Remembering the period for every query is not an easy task. For the client, deciding on a simple naming scheme beforehand could be effective. 
