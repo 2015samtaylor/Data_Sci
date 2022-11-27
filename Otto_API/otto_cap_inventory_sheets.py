@@ -61,7 +61,7 @@ class get_otto:
 drive.mount('/content/drive', force_remount = False)
 # %cd /content/drive/My Drive/gspread_pandas
 
-otto_calls = get_otto('team@customplanet.com', 'PRETTY11')
+otto_calls = get_otto(email ,password)
 c = gspread_pandas.conf.get_config('/content/drive/My Drive/gspread_pandas', 'stock-2015-d4639aac1fb5.json')
 
 def retrieve_send():
