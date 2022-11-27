@@ -48,7 +48,7 @@ class get_otto:
 # passing in variables to create object, final output returns unique url with AWS access key id
 # url is passed into function to create dataframe. Frame is sent to Google Sheets. 
 
-otto_calls = get_otto('team@customplanet.com', 'PRETTY11')
+otto_calls = get_otto(email, pass )
 
 def retrieve_send():
 
