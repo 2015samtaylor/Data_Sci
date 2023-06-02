@@ -7,7 +7,7 @@
 import sqlalchemy
 import pandas as pd
 
-engine = sqlalchemy.create_engine('mysql+pymysql://root:badass11@localhost:3306/pollution_db')
+engine = sqlalchemy.create_engine('mysql+pymysql://root:*******@localhost:3306/pollution_db')
 engine
 
 
