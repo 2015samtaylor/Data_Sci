@@ -93,7 +93,7 @@ df.to_csv('otto_inv.csv', index = False)
 
 # Hostname = '165.22.33.209'
 # Username = 'root'
-# Password = 'S1lverado14!'
+# Password = ''
 # sftpPort = 22
 
 # # ignore hosts check
