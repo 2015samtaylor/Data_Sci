@@ -1,6 +1,4 @@
-## Green Street
-
-## Green Street Advisors Python Test
+# GS
 
 Background:
 • We have collected data on single-family homes that we want to analyze.
